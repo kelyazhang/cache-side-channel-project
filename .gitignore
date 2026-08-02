@@ -1,0 +1,32 @@
+# Build output
+build/
+*.o
+*.out
+*.exe
+
+# Temporary files
+*.tmp
+*.log
+*~
+*.swp
+
+# Python-generated files
+__pycache__/
+*.pyc
+*.pyo
+
+# Typora temporary files
+*.md.backup
+
+# Operating-system files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor settings
+.vscode/
+.idea/
+
+# Large raw datasets
+data/raw/*.bin
+
