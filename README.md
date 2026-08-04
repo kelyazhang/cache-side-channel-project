@@ -1,7 +1,7 @@
 # Cache Side-Channel Project
 
 This repository documents a staged cache side-channel project carried out on
-a local Intel/Linux system. The work follows the supplied intern project brief:
+a local Intel/Linux system. The work follows :
 first establish a trustworthy timing primitive, then use it to build and
 measure a covert channel, recover a classical cryptographic key, and finally
 characterize a post-quantum cryptography (PQC) leakage. Weeks 5 and 6 are
