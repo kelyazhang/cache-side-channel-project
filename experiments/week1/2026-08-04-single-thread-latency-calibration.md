@@ -10,6 +10,11 @@
 - Raw data:
   - `data/raw/week1/calibration_rdtscp_50000.csv`
   - `data/raw/week1/calibration_rdtsc_50000.csv`
+- Processed analysis:
+  - `data/processed/week1/flush_reload_calibration/plot_calibration_rdtscp.m`
+  - `data/processed/week1/flush_reload_calibration/plot_calibration_rdtsc.m`
+  - `data/processed/week1/flush_reload_calibration/flush_reload_rdtscp_calibration.png`
+  - `data/processed/week1/flush_reload_calibration/flush_reload_rdtsc_calibration.png`
 - Git commit: record after this change is committed
 - CPU binding: logical CPU 5 in both source files
 
@@ -41,11 +46,10 @@ are invariant TSC ticks.
 | Dataset | Rows | HIT min | HIT median | HIT mean | HIT max | MISS min | MISS median | MISS mean | MISS max |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
 | `calibration_rdtscp_50000.csv` | 50,000 | 90 | 100 | 99.33 | 156 | 824 | 1,094 | 1,117.76 | 2,630 |
-| `calibration_rdtsc_50000.csv` | 100 | 76 | 78 | 78.06 | 84 | 936 | 996 | 1,021.94 | 1,544 |
+| `calibration_rdtsc_50000.csv` | 50,000 | 70 | 78 | 78.08 | 980 | 838 | 1,068 | 1,082.08 | 2,518 |
 
-The `rdtscp` dataset contains 50,000 data rows. The `rdtsc` filename contains
-`50000`, but the file contains 100 data rows; the observed row count is kept
-as the authoritative value.
+Both archived datasets now contain 50,000 data rows. The raw files remain the
+authoritative source for the statistics above.
 
 ## Interpretation
 

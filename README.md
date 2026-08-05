@@ -37,12 +37,12 @@ The original latency CSV files are stored without manual modification under
 | Dataset | Rows | HIT latency (min / median / mean / max) | MISS latency (min / median / mean / max) |
 |---|---:|---:|---:|
 | `calibration_rdtscp_50000.csv` | 50,000 | 90 / 100 / 99.33 / 156 | 824 / 1,094 / 1,117.76 / 2,630 |
-| `calibration_rdtsc_50000.csv` | 100 | 76 / 78 / 78.06 / 84 | 936 / 996 / 1,021.94 / 1,544 |
+| `calibration_rdtsc_50000.csv` | 50,000 | 70 / 78 / 78.08 / 980 | 838 / 1,068 / 1,082.08 / 2,518 |
 
-The second filename says `50000`, but the file itself contains 100 recorded
-rows. The README reports the observed file contents rather than inferring the
-sample count from the filename. A histogram and a written threshold decision
-are the next Week 1 analysis items.
+The two archived datasets now have matched sample counts. MATLAB scripts and
+histograms are stored under
+`data/processed/week1/flush_reload_calibration/`. A written threshold decision
+and repeatability analysis remain the next Week 1 items.
 
 ## Repository Layout
 
