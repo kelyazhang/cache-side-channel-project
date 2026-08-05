@@ -1,7 +1,7 @@
 # Cache Side-Channel Project
 
 This repository documents a staged cache side-channel project carried out on
-a local Intel/Linux system. The work follows :
+a local Intel/Linux system. The work follows the project brief:
 first establish a trustworthy timing primitive, then use it to build and
 measure a covert channel, recover a classical cryptographic key, and finally
 characterize a post-quantum cryptography (PQC) leakage. Weeks 5 and 6 are
@@ -82,18 +82,28 @@ cache-side-channel-project/
 │   │   └── 2026-08-05-threshold-calibration.md
 │   └── week2/
 │       └── 2026-08-08-covert-channel.md
-└── report/
-    ├── week1.md
-    ├── week2.md
-    ├── week3.md
-    ├── week4.md
-    └── final-report.pdf
+├── journal/
+│   ├── template.md
+│   └── week1.md
+├── report/
+│   ├── week1.md
+│   ├── week2.md
+│   ├── week3.md
+│   ├── week4.md
+│   └── final-report.pdf
+└── docs/
+    └── repository-structure.md
 ```
 
 For later work, add `weekN/` below `src/`, `data/raw/`,
-`data/processed/`, and `experiments/` when that week produces corresponding
-artifacts. Keep raw measurements separate from processed summaries and
-presentation-ready results.
+`data/processed/`, `experiments/`, and `journal/` when that week produces
+corresponding artifacts. Keep raw measurements separate from processed
+summaries and presentation-ready results.
+
+`experiments/weekN/` contains formal, reproducible records. It must include
+successful, failed, partial, and inconclusive attempts when they tested a
+defined hypothesis. `journal/weekN.md` is the chronological learning log for
+problems, investigation steps, solutions, assumptions, and reflections.
 
 ## Experimental Platform
 
@@ -170,4 +180,15 @@ frequency changes, prefetchers, cache interference, TLB state, CPU migration,
 and compiler choices can change measured latency. A timing separation in one
 environment is not by itself evidence of portability or full key recovery.
 
+## Research Notes
 
+The full repository policy is documented in
+`docs/repository-structure.md`. The Week 1 learning log
+is in `journal/week1.md`; formal calibration details remain in
+`experiments/week1/`.
+
+## References
+
+The project scope and weekly deliverables follow `intern-project-brief.pdf`.
+The repository-structure document records the code/data/documentation and
+experiment/journal separation used here.
