@@ -1,131 +1,158 @@
 # Cache Side-Channel Project
 
-This repository documents a staged cache side-channel project carried out on
-a local Intel/Linux system. The work follows the project brief:
-first establish a trustworthy timing primitive, then use it to build and
-measure a covert channel, recover a classical cryptographic key, and finally
-characterize a post-quantum cryptography (PQC) leakage. Weeks 5 and 6 are
-extensions for Prime+Probe and a larger research target.
+This repository contains a reproducible Week 1 study of a Flush+Reload cache
+timing primitive on an Intel/Linux system. It preserves the measurement code,
+raw timing data, analysis scripts, calibration figures, experiment notes, and
+the final Week 1 report in one public research record.
 
-## Project Roadmap
+The repository is intentionally trimmed to artifacts that currently exist.
+Placeholder files for later weeks and superseded source, script, journal, and
+report files have been removed. Future work will be added only when it produces
+real code, data, or documentation.
 
-| Week | Objective | Planned evidence |
-|---|---|---|
-| 1 | Build and validate a Flush+Reload measurement primitive. | Hit/miss latency data, a bimodal histogram, a threshold, and controls. |
-| 2 | Build a two-process cache covert channel. | Bit error rate, capacity in bits/sec, and CPU-topology comparison. |
-| 3 | Recover an AES key with a software T-table victim. | Validated key recovery, trace count, success rate, and assumptions. |
-| 4 | Add controls, write the report, present the work, and characterize a PQC leak. | Reproducible AES results and a short ML-KEM/Kyber leakage study. |
-| 5 | Learn Prime+Probe and construct eviction sets without shared memory. | Eviction-set builder, covert channel, and comparison with Flush+Reload. |
-| 6 | Start a larger research target such as a local-LLM cache side channel. | Partial prompt reconstruction or an equivalent measured result. |
+## Current Status
 
-The core milestone is Week 4. Weeks 5 and 6 are intentionally elastic and do
-not replace the Week 4 report and presentation.
+Week 1 is complete. Two controlled probe variants were evaluated:
 
-## Week 1 Status
+- **RDTSCP + LFENCE** is the formal measurement configuration.
+- **RDTSC + LFENCE** is retained as a control for timestamp-instruction
+  overhead.
 
-As of **2026-08-04**, the Week 1 single-thread calibration code has been
-organized into a dedicated weekly source directory. Two controlled timing
-variants are preserved:
+Both variants use the same file-backed shared mapping, target cache line, CPU
+affinity, cache-state construction, settling delays, and buffered output. The
+timestamp instruction is the principal controlled difference.
 
-- `flush_reload_rdtscp.c` uses `RDTSCP` with `LFENCE` ordering.
-- `flush_reload_rdtsc.c` uses `RDTSC` while keeping the mapping, CPU affinity,
-  HIT/MISS construction, and NOP delays comparable.
+### Calibration Results
 
-The original latency CSV files are stored without manual modification under
-`data/raw/week1/`. The current files contain:
+| Probe | Hit median | Miss median | Threshold | Classification result |
+|---|---:|---:|---:|---|
+| RDTSCP formal probe | 100 TSC ticks | 1,094 TSC ticks | **170 ticks** | 0 false misses and 0 false hits in 100,000 classified samples |
+| RDTSC control probe | 78 TSC ticks | 1,068 TSC ticks | **150 ticks** | 1 false miss and 0 false hits in 100,000 classified samples |
 
-| Dataset | Rows | HIT latency (min / median / mean / max) | MISS latency (min / median / mean / max) |
-|---|---:|---:|---:|
-| `calibration_rdtscp_50000.csv` | 50,000 | 90 / 100 / 99.33 / 156 | 824 / 1,094 / 1,117.76 / 2,630 |
-| `calibration_rdtsc_50000.csv` | 50,000 | 70 / 78 / 78.08 / 980 | 838 / 1,068 / 1,082.08 / 2,518 |
+The formal Week 1 cache-hit rule is therefore:
 
-The two archived datasets now have matched sample counts. MATLAB scripts and
-histograms are stored under
-`data/processed/week1/flush_reload_calibration/`. A written threshold decision
-and repeatability analysis remain the next Week 1 items.
+```text
+reload time < 170 TSC ticks  -> cache hit
+reload time >= 170 TSC ticks -> cache miss
+```
+
+This threshold is specific to the measured platform and probe sequence. It
+must be recalibrated when the CPU, kernel configuration, timer sequence, CPU
+affinity, compiler settings, or frequency policy changes.
 
 ## Repository Layout
 
-The repository keeps the stable top-level separation between source code,
-automation, data, results, experiments, and reports. Weekly subdirectories are
-created only when a week has artifacts, so the layout stays readable without
-empty placeholder trees.
+The following tree matches the current tracked repository contents:
 
 ```text
 cache-side-channel-project/
-├── README.md
-├── .gitignore
-├── Makefile
-├── src/
-│   ├── week1/
-│   │   ├── flush_reload_rdtscp.c
-│   │   └── flush_reload_rdtsc.c
-│   ├── flush_reload.c
-│   ├── covert_sender.c
-│   ├── covert_receiver.c
-│   └── common.h
-├── scripts/
-├── data/
-│   ├── raw/
-│   │   └── week1/
-│   │       ├── calibration_rdtscp_50000.csv
-│   │       └── calibration_rdtsc_50000.csv
-│   └── processed/
-├── results/
-│   ├── csv/
-│   └── figures/
-├── experiments/
-│   ├── template.md
-│   ├── week1/
-│   │   ├── 2026-08-03-flush-reload-baseline.md
-│   │   ├── 2026-08-04-single-thread-latency-calibration.md
-│   │   └── 2026-08-05-threshold-calibration.md
-│   └── week2/
-│       └── 2026-08-08-covert-channel.md
-├── journal/
-│   ├── template.md
-│   └── week1.md
-├── report/
-│   ├── week1.md
-│   ├── week2.md
-│   ├── week3.md
-│   ├── week4.md
-│   └── final-report.pdf
-└── docs/
-    └── repository-structure.md
+|-- .gitignore
+|-- Makefile
+|-- README.md
+|-- src/
+|   `-- week1/
+|       |-- flush_reload_rdtsc.c
+|       `-- flush_reload_rdtscp.c
+|-- data/
+|   |-- raw/
+|   |   |-- .gitkeep
+|   |   `-- week1/
+|   |       |-- calibration_rdtsc_50000.csv
+|   |       `-- calibration_rdtscp_50000.csv
+|   `-- processed/
+|       |-- .gitkeep
+|       `-- week1/
+|           `-- flush_reload_calibration/
+|               |-- flush_reload_rdtsc_calibration.png
+|               |-- flush_reload_rdtscp_calibration.png
+|               |-- plot_calibration_rdtsc.m
+|               `-- plot_calibration_rdtscp.m
+|-- experiments/
+|   |-- template.md
+|   `-- week1/
+|       |-- 2026-08-03-flush-reload-baseline.md
+|       |-- 2026-08-04-single-thread-latency-calibration.md
+|       `-- 2026-08-05-threshold-calibration.md
+|-- report/
+|   |-- report_week1.md
+|   `-- report_week1.pdf
+`-- docs/
+    |-- repository-structure.md
+    `-- week1_journal/
+        `-- Experimental Environment_week1.md
 ```
 
-For later work, add `weekN/` below `src/`, `data/raw/`,
-`data/processed/`, `experiments/`, and `journal/` when that week produces
-corresponding artifacts. Keep raw measurements separate from processed
-summaries and presentation-ready results.
+`Makefile` is currently reserved for future build automation. The documented
+GCC commands below are the current build entry point.
 
-`experiments/weekN/` contains formal, reproducible records. It must include
-successful, failed, partial, and inconclusive attempts when they tested a
-defined hypothesis. `journal/weekN.md` is the chronological learning log for
-problems, investigation steps, solutions, assumptions, and reflections.
+## Artifact Guide
 
-## Experimental Platform
+### Source Code
 
-The project brief requires a native Linux installation rather than WSL or a
-virtual machine because timing and MSR access are hardware-sensitive. Record
-the exact values for the local run before publishing a final result.
+- [`src/week1/flush_reload_rdtscp.c`](src/week1/flush_reload_rdtscp.c) contains
+  the formal RDTSCP probe with LFENCE ordering.
+- [`src/week1/flush_reload_rdtsc.c`](src/week1/flush_reload_rdtsc.c) contains
+  the controlled RDTSC variant.
 
-- CPU model and microarchitecture: to be recorded
-- Operating system and kernel: to be recorded
-- Compiler and version: GCC, exact version to be recorded
-- Main-thread CPU: logical CPU 5 in the current source
-- CPU type: use a P-core on hybrid Intel systems
-- TSC: invariant TSC assumed by the experiment
-- Frequency governor, Turbo Boost, prefetchers, ASLR, and background load:
-  record for each formal experiment
+Each program pins itself to logical CPU 5, maps a shared read-only page from
+`/bin/ls`, constructs independent HIT and MISS samples, and writes the timing
+results only after measurement has finished.
 
-## Week 1 Reproduction
+### Raw and Processed Data
 
-Build the two timing variants from the repository root on native Linux:
+- [`data/raw/week1/`](data/raw/week1/) contains the two archived 50,000-round
+  CSV datasets. These files are direct experimental output and should not be
+  edited manually.
+- [`data/processed/week1/flush_reload_calibration/`](data/processed/week1/flush_reload_calibration/)
+  contains the MATLAB plotting scripts and generated calibration histograms.
+
+### Experiment Records and Report
+
+- [`experiments/week1/`](experiments/week1/) contains dated notes for the
+  baseline, latency calibration, and threshold decision.
+- [`report/report_week1.md`](report/report_week1.md) is the complete Week 1
+  technical report.
+- [`report/report_week1.pdf`](report/report_week1.pdf) is the publication-ready
+  PDF version of the report.
+- [`docs/repository-structure.md`](docs/repository-structure.md) records the
+  broader repository organization and research-record conventions.
+- [`docs/week1_journal/Experimental Environment_week1.md`](docs/week1_journal/Experimental%20Environment_week1.md)
+  records the Week 1 host, kernel, compiler, CPU topology, boot parameters,
+  runtime controls, and verification commands.
+
+## Measurement Procedure
+
+Each recorded sample follows one of two paths:
+
+```text
+flush target with CLFLUSH
+-> MFENCE
+-> wait for the flush to settle
+-> HIT: perform one untimed target load
+   MISS: do not access the target
+-> wait for the reload state to settle
+-> time one target reload
+-> store the result in memory
+```
+
+The formal timer surrounds the target load with LFENCE and RDTSCP operations.
+Formatted output and file I/O occur after the sampling loop so they do not
+contaminate the timed interval.
+
+## Build and Run
+
+### Requirements
+
+- Native x86-64 Linux
+- GCC with GNU C11 support
+- A processor supporting `RDTSC`, `RDTSCP`, `CLFLUSH`, and `LFENCE`
+- Permission to set CPU affinity
+
+Build both variants from the repository root:
 
 ```bash
 mkdir -p build
+
 gcc -O3 -std=gnu11 -Wall -Wextra -march=native \
     -fno-pie -no-pie \
     src/week1/flush_reload_rdtscp.c \
@@ -137,47 +164,74 @@ gcc -O3 -std=gnu11 -Wall -Wextra -march=native \
     -o build/flush_reload_rdtsc
 ```
 
-Run on the same P-core selected by `TARGET_CPU`:
+The source currently selects logical CPU 5 through `TARGET_CPU`. Review
+`TARGET_CPU` and `SAMPLE_COUNT` in each source file before running on another
+machine. The CPU passed to `taskset` must match the value compiled into the
+program.
+
+Run the probes and save each new dataset under a new descriptive filename:
 
 ```bash
-sudo taskset -c 5 ./build/flush_reload_rdtscp > data/raw/week1/rdtscp_new.csv
-sudo taskset -c 5 ./build/flush_reload_rdtsc > data/raw/week1/rdtsc_new.csv
+sudo taskset -c 5 ./build/flush_reload_rdtscp \
+    > data/raw/week1/rdtscp_new.csv
+
+sudo taskset -c 5 ./build/flush_reload_rdtsc \
+    > data/raw/week1/rdtsc_new.csv
 ```
 
-Do not overwrite the archived raw CSV files. Use a new descriptive filename
-for each additional run and record the command, commit, environment, and
-parameters in an experiment note.
+Do not overwrite the archived calibration CSV files. A formal rerun should
+also record the Git commit, hardware and software environment, compiler flags,
+CPU binding, kernel configuration, and analysis command.
 
-## Data and Analysis Rules
+## Experimental Platform
 
-- Files under `data/raw/` are direct program output and must not be edited by
-  hand.
-- Files under `data/processed/` are generated from raw data by committed
-  scripts.
-- Files under `results/` are finalized tables or figures cited by reports.
-- Every formal experiment records its source path, Git commit, hardware and
-  software environment, compiler flags, CPU binding, raw-data path, analysis
-  command, unexpected behavior, conclusion, and next step.
+The reported Week 1 calibration used:
 
-The Week 1 note at
-`experiments/week1/2026-08-04-single-thread-latency-calibration.md` records the
-current code organization and the observed latency distributions.
+- Intel Core Ultra 7 155H (Meteor Lake)
+- one Redwood Cove performance core
+- logical CPU 5
+- Ubuntu 24.04.4 LTS with Linux kernel 6.8.0-100-generic
+- GCC 13.3.0
+- native Linux with the measurement process pinned to the selected core
+- invariant TSC timing
+- SMT disabled and measurement cores isolated from ordinary housekeeping work
+- performance-oriented frequency and idle-state controls
 
-## Planned Analysis and Deliverables
+See the [Week 1 environment record](docs/week1_journal/Experimental%20Environment_week1.md)
+for the complete host configuration and verification procedure. The
+[Week 1 report](report/report_week1.md) documents the scheduler, interrupt,
+idle-state, cache-state, and timestamping controls used for calibration.
 
-1. Plot hit/miss latency histograms and select a defensible threshold.
-2. Document timing controls and repeatability for the Week 1 check-in.
-3. Use the validated probe in the Week 2 sender/receiver channel.
-4. Measure error rate and capacity across same-core and cross-core layouts.
-5. Prepare the Week 3 software T-table AES victim and validate recovered keys.
-6. Add Week 4 controls, the technical report, the presentation, and a PQC
-   leakage characterization.
+## Data Integrity Rules
 
-## Limitations
+- Treat files under `data/raw/` as immutable experimental output.
+- Generate plots and summaries from committed analysis scripts.
+- Keep build products in `build/`; compiled binaries are not research
+  artifacts and should not be committed.
+- Add a new weekly directory only when that week has actual artifacts.
+- Record unsuccessful and inconclusive experiments when they test a defined
+  hypothesis; reproducibility includes failures as well as successful runs.
 
-Results are hardware- and OS-dependent. Scheduler activity, interrupts,
-frequency changes, prefetchers, cache interference, TLB state, CPU migration,
-and compiler choices can change measured latency. A timing separation in one
-environment is not by itself evidence of portability or full key recovery.
+## Scope and Limitations
 
+This repository demonstrates a calibrated single-process Flush+Reload timing
+primitive. It does not yet contain a two-process covert channel, AES key
+recovery, Prime+Probe implementation, or PQC leakage experiment.
 
+Cache timing is sensitive to CPU topology, scheduling, interrupts, frequency
+changes, prefetchers, cache interference, TLB state, compiler choices, and
+kernel configuration. Clear separation on this machine does not establish a
+universal threshold or prove portability to another system.
+
+## Planned Next Work
+
+Future artifacts may extend the validated primitive toward:
+
+1. a synchronized two-process Flush+Reload covert channel;
+2. error-rate and channel-capacity measurements across CPU placements;
+3. a software T-table AES key-recovery experiment;
+4. Prime+Probe and eviction-set construction; and
+5. a small post-quantum or larger-system cache-leakage study.
+
+These items are roadmap goals only. They will appear in the repository when
+corresponding code, measurements, and experiment records are available.
