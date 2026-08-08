@@ -186,9 +186,3 @@ The full repository policy is documented in
 `docs/repository-structure.md`. The Week 1 learning log
 is in `journal/week1.md`; formal calibration details remain in
 `experiments/week1/`.
-
-## References
-
-The project scope and weekly deliverables follow `intern-project-brief.pdf`.
-The repository-structure document records the code/data/documentation and
-experiment/journal separation used here.
