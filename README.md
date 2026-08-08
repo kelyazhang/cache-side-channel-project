@@ -180,9 +180,4 @@ frequency changes, prefetchers, cache interference, TLB state, CPU migration,
 and compiler choices can change measured latency. A timing separation in one
 environment is not by itself evidence of portability or full key recovery.
 
-## Research Notes
 
-The full repository policy is documented in
-`docs/repository-structure.md`. The Week 1 learning log
-is in `journal/week1.md`; formal calibration details remain in
-`experiments/week1/`.
